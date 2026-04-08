@@ -1,0 +1,232 @@
+/* writemode_override.css — loaded LAST, overrides everything */
+
+/* ── Write Mode shell ── */
+#write-mode-overlay { position: fixed !important; inset: 0 !important; z-index: 2000 !important; }
+
+.wm-shell {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  background: var(--bg-base) !important;
+  overflow: hidden !important;
+}
+
+.wm-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 16px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  flex-shrink: 0 !important;
+  background: var(--bg-surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  overflow: hidden !important;
+  transition: height 0.2s, opacity 0.2s !important;
+}
+
+.wm-body {
+  flex: 1 !important;
+  display: flex !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+  position: relative !important;
+}
+
+/* ── Normal Write Mode: gutter + textarea, no centering, full width ── */
+.wm-editor-wrap {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+  /* NO justify-content — let children stretch left-to-right naturally */
+}
+
+/* Gutter — left edge, fixed width */
+.wm-gutter {
+  width: 52px !important;
+  min-width: 52px !important;
+  flex-shrink: 0 !important;
+  background: var(--bg-surface) !important;
+  border-right: 1px solid var(--border) !important;
+  overflow: hidden !important;
+  padding: 16px 0 !important;
+  text-align: right !important;
+  font-family: var(--font-mono) !important;
+  font-size: 13px !important;
+  line-height: 22.95px !important;
+  color: var(--text-muted) !important;
+  user-select: none !important;
+}
+.wm-gutter-line {
+  padding-right: 10px !important;
+  height: 22.95px !important;
+  line-height: 22.95px !important;
+}
+
+/* ── THE TEXTAREA ──
+   flex:1 so it fills ALL remaining width after the gutter.
+   overflow-y:scroll so the browser's native scrollbar lives
+   at the very right edge of the textarea — no padding-right gap.
+   padding-right:0 so text runs right up to (but not under) the scrollbar.
+*/
+.wm-editor {
+  flex: 1 !important;
+  min-width: 0 !important;
+  width: 0 !important;        /* flex will expand it; explicit 0 prevents shrink-fight */
+  height: 100% !important;
+  resize: none !important;
+  border: none !important;
+  outline: none !important;
+  background: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+  font-family: 'JetBrains Mono', 'Consolas', monospace !important;
+  font-size: 13.5px !important;
+  line-height: 1.7 !important;
+  /* Left padding for breathing room after gutter; right padding 0 — scrollbar sits flush */
+  padding: 16px 0 16px 14px !important;
+  box-sizing: border-box !important;
+  overflow-y: scroll !important;
+  overflow-x: auto !important;
+  white-space: pre !important;
+  tab-size: 2 !important;
+  /* Thin scrollbar, flush right */
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--border-light) var(--bg-base) !important;
+  margin: 0 !important;
+}
+.wm-editor::-webkit-scrollbar       { width: 8px !important; }
+.wm-editor::-webkit-scrollbar-track { background: var(--bg-base) !important; }
+.wm-editor::-webkit-scrollbar-thumb { background: var(--border-light) !important; border-radius: 4px !important; }
+.wm-editor::-webkit-scrollbar-thumb:hover { background: var(--accent-dim) !important; }
+
+/* Sidebar */
+.wm-sidebar {
+  width: 280px !important;
+  min-width: 280px !important;
+  flex-shrink: 0 !important;
+  border-left: 1px solid var(--border) !important;
+  background: var(--bg-surface) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  transition: width 0.2s, min-width 0.2s !important;
+}
+.wm-sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  border-left: none !important;
+}
+
+/* ════════════════════════════════
+   FOCUS MODE — distraction-free BUT with line numbers
+   ════════════════════════════════ */
+
+/* Kill toolbar and sidebar only — gutter stays */
+.wm-shell.focus-mode .wm-toolbar {
+  height: 0 !important;
+  min-height: 0 !important;
+  opacity: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  pointer-events: none !important;
+}
+.wm-shell.focus-mode .wm-sidebar { display: none !important; }
+
+/* Keep gutter visible in focus mode */
+.wm-shell.focus-mode .wm-gutter {
+  display: block !important;
+  /* same styles as normal mode — already inherited */
+}
+
+/* Editor wrap: gutter stays left, textarea fills the rest — no centering */
+.wm-shell.focus-mode .wm-editor-wrap {
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  background: var(--bg-base) !important;
+}
+
+/* Focus mode textarea: comfortable larger font, wraps at edge, scrollbar flush right */
+.wm-shell.focus-mode .wm-editor {
+  flex: 1 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  /* Remove any max-width centering — use the full available width */
+  max-width: none !important;
+  padding: 40px 0 120px 20px !important;
+  font-size: 15px !important;
+  line-height: 1.9 !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  /* Scrollbar at right edge of the textarea column */
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255,255,255,0.10) transparent !important;
+}
+.wm-shell.focus-mode .wm-editor::-webkit-scrollbar       { width: 6px !important; }
+.wm-shell.focus-mode .wm-editor::-webkit-scrollbar-track { background: transparent !important; }
+.wm-shell.focus-mode .wm-editor::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10) !important; border-radius: 3px !important; }
+
+/* Focus mode gutter matches the larger line-height */
+.wm-shell.focus-mode .wm-gutter {
+  padding: 40px 0 0 0 !important;
+  line-height: 1.9 !important;
+  font-size: 13px !important;
+}
+.wm-shell.focus-mode .wm-gutter .wm-gutter-line {
+  /* line-height must match focus editor: 15px * 1.9 = 28.5px */
+  height: 28.5px !important;
+  line-height: 28.5px !important;
+}
+
+/* Responsive: on narrow screens drop to full width */
+@media (max-width: 800px) {
+  .wm-shell.focus-mode .wm-editor {
+    padding: 40px 0 80px 14px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* Word count floating bottom center in focus mode */
+.wm-focus-wc {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  color: var(--text-muted) !important;
+  opacity: 0.45 !important;
+  pointer-events: none !important;
+  z-index: 3000 !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* ── Toolbar elements ── */
+.wm-toolbar-left  { display: flex; align-items: center; gap: 8px; overflow: hidden; min-width: 0; flex: 1; }
+.wm-toolbar-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.wm-scene-name    { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); white-space: nowrap; margin-right: 4px; }
+.wm-wc            { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.wm-btn {
+  padding: 4px 12px; background: var(--bg-raised); border: 1px solid var(--border);
+  color: var(--text-secondary); border-radius: 6px; font-size: 11px; cursor: pointer;
+  font-family: var(--font-mono); white-space: nowrap;
+}
+.wm-btn:hover  { color: var(--text-primary); }
+.wm-btn.accent { background: var(--accent); color: var(--bg-base); border-color: var(--accent); }
+.wm-btn.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+.wm-btn.exit-btn { color: var(--text-muted); }
+
+/* ── Main editor (regular view) scrollbar flush right ── */
+.code-editor-wrap { overflow: hidden !important; }
+.code-editor {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--border-light) transparent !important;
+}
+.code-editor::-webkit-scrollbar       { width: 8px !important; }
+.code-editor::-webkit-scrollbar-track { background: transparent !important; }
+.code-editor::-webkit-scrollbar-thumb { background: var(--border-light) !important; border-radius: 4px !important; }

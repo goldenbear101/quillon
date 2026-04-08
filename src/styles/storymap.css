@@ -1,0 +1,22 @@
+/* storymap.css */
+.storymap-shell { display:flex; flex-direction:column; height:100%; background:var(--bg-base); }
+.storymap-toolbar { display:flex; align-items:center; padding:10px 18px; background:var(--bg-surface); border-bottom:1px solid var(--border); gap:12px; flex-shrink:0; }
+.storymap-title { font-family:var(--font-mono); font-size:12px; color:var(--text-secondary); }
+.storymap-toolbar-right { display:flex; align-items:center; gap:12px; margin-left:auto; }
+.storymap-hint { font-size:11px; color:var(--text-muted); font-style:italic; }
+.storymap-btn { padding:5px 12px; background:var(--bg-raised); border:1px solid var(--border); color:var(--text-secondary); border-radius:6px; font-size:11px; cursor:pointer; font-family:var(--font-mono); }
+.storymap-btn:hover { color:var(--accent); border-color:var(--accent); }
+.storymap-legend { display:flex; align-items:center; gap:18px; padding:6px 18px; background:var(--bg-surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.sm-legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted); font-family:var(--font-mono); }
+.sm-legend-dot { width:10px; height:10px; border-radius:50%; }
+.sm-legend-line { width:24px; height:2px; background:rgba(200,169,110,0.4); border-radius:1px; }
+.sm-legend-edge { gap:6px; }
+.storymap-canvas { flex:1; display:block; cursor:grab; }
+.storymap-canvas:active { cursor:grabbing; }
+.storymap-tooltip {
+  position:fixed; pointer-events:none; z-index:999;
+  background:var(--bg-raised); border:1px solid var(--border);
+  padding:8px 12px; border-radius:6px; font-size:12px;
+  color:var(--text-primary); font-family:var(--font-mono);
+  box-shadow:var(--shadow-deep); line-height:1.6; max-width:220px;
+}

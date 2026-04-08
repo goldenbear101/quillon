@@ -1,0 +1,39 @@
+/* modals.css */
+#modal-container { position:relative; z-index:800; }
+.modal-backdrop {
+  position:fixed; inset:0; background:rgba(0,0,0,0.7);
+  z-index:800; display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(4px); opacity:0; transition:opacity 0.15s;
+}
+.modal-backdrop.visible { opacity:1; }
+.modal-box {
+  background:var(--bg-raised); border:1px solid var(--border-light);
+  border-radius:var(--radius-lg); padding:28px 32px;
+  width:440px; max-width:95vw; box-shadow:var(--shadow-deep);
+  animation:popIn 0.18s ease; max-height:90vh; overflow-y:auto;
+}
+.modal-icon { font-size:28px; margin-bottom:12px; display:block; }
+.modal-title { font-family:var(--font-display); font-size:20px; font-weight:600; color:var(--text-primary); margin-bottom:8px; }
+.modal-desc { font-size:14px; color:var(--text-secondary); line-height:1.6; margin-bottom:20px; }
+.modal-body { margin-bottom:20px; }
+.modal-actions { display:flex; gap:10px; margin-top:4px; }
+.modal-cancel { flex:1; padding:10px; border-radius:var(--radius); font-family:var(--font-mono); font-size:11px; font-weight:500; text-transform:uppercase; background:var(--bg-hover); border:1px solid var(--border); color:var(--text-secondary); cursor:pointer; transition:all 0.15s; }
+.modal-cancel:hover { background:var(--bg-base); color:var(--text-primary); }
+.modal-confirm-ok { flex:1; padding:10px; border-radius:var(--radius); font-family:var(--font-mono); font-size:11px; font-weight:500; text-transform:uppercase; background:var(--accent); border:1px solid var(--accent); color:var(--bg-base); cursor:pointer; transition:all 0.15s; }
+.modal-confirm-ok:hover { background:#d4b87a; }
+.modal-confirm-delete { flex:1; padding:10px; border-radius:var(--radius); font-family:var(--font-mono); font-size:11px; font-weight:500; text-transform:uppercase; background:var(--red); border:1px solid var(--red); color:white; cursor:pointer; transition:all 0.15s; }
+.modal-confirm-delete:hover { background:#a04848; }
+.modal-confirm-run { flex:1; padding:10px; border-radius:var(--radius); font-family:var(--font-mono); font-size:11px; font-weight:500; text-transform:uppercase; background:var(--green); border:1px solid var(--green); color:white; cursor:pointer; transition:all 0.15s; }
+.modal-confirm-run:hover { background:#3d7a52; }
+
+/* ── Form fields in modals ── */
+.form-field { margin-bottom:14px; }
+.form-field label { display:block; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:6px; }
+.modal-input {
+  width:100%; background:var(--bg-base); border:1px solid var(--border);
+  border-radius:var(--radius); padding:10px 12px; color:var(--text-primary);
+  font-family:var(--font-body); font-size:14px; outline:none; transition:border-color 0.15s;
+}
+.modal-input:focus { border-color:var(--accent-dim); }
+.modal-select { font-family:var(--font-mono); font-size:12px; cursor:pointer; }
+.modal-textarea { resize:none; height:72px; line-height:1.5; }

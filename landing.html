@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quillon — Write Interactive Fiction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #0a0a0c;
+  --parchment: #f0ebe0;
+  --gold: #c9a45a;
+  --gold-dim: rgba(201,164,90,0.12);
+  --gold-glow: rgba(201,164,90,0.3);
+  --dim: rgba(240,235,224,0.55);
+  --muted: rgba(240,235,224,0.35);
+  --border: rgba(201,164,90,0.2);
+  --surface: rgba(255,255,255,0.03);
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Cormorant Garamond', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── Noise texture overlay ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 22px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(10,10,12,0.95) 0%, transparent 100%);
+  backdrop-filter: blur(12px);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.nav-logo-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.nav-logo-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.nav-links a {
+  color: var(--dim);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--parchment); }
+
+/* ── Hero ── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 40px 80px;
+  overflow: hidden;
+}
+
+/* Radial glow behind hero */
+.hero::after {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(201,164,90,0.08) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.2s forwards;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 8vw, 7rem);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  line-height: 1.1;
+  color: var(--parchment);
+  margin-bottom: 12px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.35s forwards;
+}
+
+.hero-title em {
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.hero-rule {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 28px auto;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.5s forwards;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: var(--dim);
+  max-width: 600px;
+  line-height: 1.7;
+  font-style: italic;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.65s forwards;
+  margin-bottom: 60px;
+}
+
+/* ── CTA Buttons ── */
+.cta-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.8s forwards;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+
+.btn-primary:hover::before { transform: translateX(0); }
+.btn-primary:hover { box-shadow: 0 0 40px var(--gold-glow); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 36px;
+  background: transparent;
+  color: var(--parchment);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-dim);
+}
+
+.btn-note {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 6px;
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+/* ── Scroll indicator ── */
+.scroll-hint {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-family: var(--font-display);
+  animation: fadeIn 1.5s 1.5s forwards;
+  opacity: 0;
+}
+
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(180deg, var(--gold), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.2); }
+}
+
+/* ── Section shared styles ── */
+section {
+  position: relative;
+  z-index: 1;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.section-label {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+/* ── Features ── */
+.features {
+  padding: 120px 0;
+  border-top: 1px solid var(--border);
+}
+
+.features-intro {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.features-intro p {
+  color: var(--dim);
+  font-size: 1.15rem;
+  font-style: italic;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  border: 1px solid var(--border);
+}
+
+.feature-cell {
+  padding: 40px 32px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: background 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-cell::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px;
+  height: 0;
+  background: var(--gold);
+  transition: height 0.4s;
+}
+
+.feature-cell:hover { background: rgba(201,164,90,0.05); }
+.feature-cell:hover::before { height: 100%; }
+
+.feature-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 20px;
+  color: var(--gold);
+}
+
+.feature-name {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--parchment);
+  margin-bottom: 12px;
+}
+
+.feature-desc {
+  font-size: 1rem;
+  color: var(--dim);
+  line-height: 1.65;
+  font-style: italic;
+}
+
+/* ── Screenshot / App Preview ── */
+.preview-section {
+  padding: 80px 0 120px;
+}
+
+.preview-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.preview-bar {
+  background: rgba(201,164,90,0.06);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+.preview-dot:nth-child(1) { background: #ff5f57; }
+.preview-dot:nth-child(2) { background: #ffbd2e; }
+.preview-dot:nth-child(3) { background: #28c840; }
+
+.preview-url {
+  margin-left: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: rgba(0,0,0,0.3);
+  padding: 4px 16px;
+  border-radius: 20px;
+}
+
+.preview-app {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  height: 380px;
+}
+
+.preview-sidebar {
+  background: rgba(0,0,0,0.3);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+}
+
+.preview-sidebar-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.preview-scene {
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview-scene.active { color: var(--gold); background: var(--gold-dim); }
+.preview-scene-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.preview-editor {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  color: var(--dim);
+  overflow: hidden;
+}
+
+.preview-line { display: flex; gap: 16px; }
+.preview-ln { color: var(--muted); user-select: none; width: 20px; text-align: right; }
+.preview-cmd { color: var(--gold); }
+.preview-str { color: #7eb8a4; }
+.preview-comment { color: #555; font-style: italic; }
+
+.preview-errors {
+  border-left: 1px solid var(--border);
+  padding: 16px;
+  overflow: hidden;
+}
+
+.preview-errors-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.preview-error-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background: rgba(180,60,60,0.08);
+  border: 1px solid rgba(180,60,60,0.2);
+  margin-bottom: 8px;
+  font-size: 0.75rem;
+}
+
+.preview-error-line { color: #e07e7e; font-family: var(--font-mono); }
+.preview-error-msg { color: var(--dim); }
+
+/* ── Philosophy ── */
+.philosophy {
+  padding: 100px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.philosophy-quote {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-style: italic;
+  color: var(--parchment);
+  max-width: 760px;
+  margin: 0 auto 24px;
+  line-height: 1.6;
+}
+
+.philosophy-attr {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* ── CTA Section ── */
+.cta-section {
+  padding: 120px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.cta-section .section-title {
+  margin-bottom: 16px;
+}
+
+.cta-section p {
+  color: var(--dim);
+  font-style: italic;
+  font-size: 1.1rem;
+  margin-bottom: 50px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-buttons-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.cta-pair {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.cta-divider {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.privacy-note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+.footer-text {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s, transform 0.7s;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+.reveal-delay-6 { transition-delay: 0.6s; }
+
+/* ── Decorative lines ── */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.ornament-line {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+
+.ornament-line:last-child {
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.ornament-diamond {
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  transform: rotate(45deg);
+}
+
+/* ── Cursor ── */
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--gold);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="none">
+      <path d="M6 6 C6 6 12 3 16 16 C20 29 26 26 26 26" stroke="#c9a45a" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M6 26 C6 26 10 20 16 16 C22 12 26 6 26 6" stroke="#c9a45a" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+      <circle cx="16" cy="16" r="2.5" fill="#c9a45a"/>
+    </svg>
+    <span class="nav-logo-text">QUILLON</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#preview">Preview</a>
+    <a href="#start">Get Started</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-eyebrow">Interactive Fiction Workbench</div>
+  <h1 class="hero-title">QUILLON<br><em>Write Every Path</em></h1>
+  <div class="hero-rule"></div>
+  <p class="hero-subtitle">
+    A dedicated writing environment for ChoiceScript authors. Live error checking, scene management, character tracking — everything your story needs, nothing it doesn't.
+  </p>
+  <div class="cta-wrap">
+    <a href="#download" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
+      Download Software
+    </a>
+    <a href="http://localhost:5173" class="btn-secondary">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2c-2 2-3 3.5-3 6s1 4 3 6"/><path d="M8 2c2 2 3 3.5 3 6s-1 4-3 6"/><path d="M2 8h12"/></svg>
+      Use in Browser
+    </a>
+  </div>
+  <p class="btn-note">Your work stays on your machine. Always.</p>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-intro reveal">
+      <div class="ornament">
+        <div class="ornament-line"></div>
+        <div class="ornament-diamond"></div>
+        <div class="ornament-line"></div>
+      </div>
+      <div class="section-label">Capabilities</div>
+      <h2 class="section-title">Built for the Way You Write</h2>
+      <p>Every feature exists because ChoiceScript authors asked for it — and couldn't find it anywhere else.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-cell reveal reveal-delay-1">
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M6 10h24M6 16h16M6 22h20M6 28h12"/>
+          <circle cx="28" cy="24" r="5" stroke-width="1.5"/>
+          <path d="M32 28l3 3" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-name">Live Error Checking</div>
+        <p class="feature-desc">Errors surface as you type — 400ms after you stop — with exact line numbers and fixes. Like Grammarly, but for ChoiceScript logic.</p>
+      </div>
+
+      <div class="feature-cell reveal reveal-delay-2">
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="4" y="4" width="12" height="10" rx="1.5"/>
+          <rect x="20" y="4" width="12" height="6" rx="1.5"/>
+          <rect x="20" y="14" width="12" height="8" rx="1.5"/>
+          <rect x="4" y="18" width="12" height="14" rx="1.5"/>
+          <rect x="20" y="26" width="12" height="6" rx="1.5"/>
+        </svg>
+        <div class="feature-name">Acts & Chapters</div>
+        <p class="feature-desc">Organise your scenes into acts visually. Drag scenes between chapters. See your story's architecture at a glance.</p>
+      </div>
+
+      <div class="feature-cell reveal reveal-delay-3">
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="18" cy="12" r="5"/>
+          <circle cx="8" cy="24" r="4"/>
+          <circle cx="28" cy="24" r="4"/>
+          <path d="M13 15.5L10 21M23 15.5L26 21M12 24h12"/>
+        </svg>
+        <div class="feature-name">Character Tracker</div>
+        <p class="feature-desc">Every character detected across your scenes — their appearances, variables, and scene count — automatically, without tagging anything.</p>
+      </div>
+
+      <div class="feature-cell reveal reveal-delay-4">
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M6 28L10 18l4 6 4-10 4 8 4-4 4 10"/>
+          <path d="M6 8h8M6 14h5" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-name">Word Count Goals</div>
+        <p class="feature-desc">Set a target. Track progress with a live bar. Daily, weekly, or full-project periods — your pace, your rules.</p>
+      </div>
+
+      <div class="feature-cell reveal reveal-delay-5">
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M18 4v6M18 26v6M4 18h6M26 18h6"/>
+          <circle cx="18" cy="18" r="8"/>
+          <circle cx="18" cy="18" r="3" fill="currentColor" opacity="0.3"/>
+        </svg>
+        <div class="feature-name">Focus / Write Mode</div>
+        <p class="feature-desc">One keypress collapses everything but the words. Full-screen, distraction-free writing with the editor expanded edge-to-edge.</p>
+      </div>
+
+      <div class="feature-cell reveal reveal-delay-6">
+        <svg class="feature-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M10 6h16l4 6v18H6V6h4z"/>
+          <path d="M10 6v6h16V6"/>
+          <path d="M12 18h12M12 23h8"/>
+        </svg>
+        <div class="feature-name">Export Ready</div>
+        <p class="feature-desc">One click packages your entire project — scenes, images, README — into a .zip ready to submit to Choice of Games or host yourself.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- App Preview -->
+<section class="preview-section" id="preview">
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:50px">
+      <div class="section-label">The Workbench</div>
+      <h2 class="section-title">Designed Around Your Story</h2>
+    </div>
+    <div class="preview-inner reveal">
+      <div class="preview-bar">
+        <div class="preview-dot"></div>
+        <div class="preview-dot"></div>
+        <div class="preview-dot"></div>
+        <div class="preview-url">localhost:5173 — Quillon</div>
+      </div>
+      <div class="preview-app">
+        <div class="preview-sidebar">
+          <div class="preview-sidebar-label">Scenes</div>
+          <div class="preview-scene active"><div class="preview-scene-dot"></div>startup</div>
+          <div class="preview-scene"><div class="preview-scene-dot"></div>chapter_one</div>
+          <div class="preview-scene"><div class="preview-scene-dot"></div>the_choice</div>
+          <div class="preview-scene"><div class="preview-scene-dot"></div>aftermath</div>
+          <div class="preview-scene"><div class="preview-scene-dot"></div>ending_a</div>
+          <div class="preview-scene"><div class="preview-scene-dot"></div>ending_b</div>
+        </div>
+        <div class="preview-editor">
+          <div class="preview-line"><span class="preview-ln">1</span><span class="preview-cmd">*title</span> <span style="color:var(--dim)">The Hollowed Crown</span></div>
+          <div class="preview-line"><span class="preview-ln">2</span><span class="preview-cmd">*author</span> <span style="color:var(--dim)">A. Marchetti</span></div>
+          <div class="preview-line"><span class="preview-ln">3</span></div>
+          <div class="preview-line"><span class="preview-ln">4</span><span class="preview-comment">*comment — Player variables</span></div>
+          <div class="preview-line"><span class="preview-ln">5</span><span class="preview-cmd">*create</span> <span style="color:var(--dim)">name</span> <span class="preview-str">"Unnamed"</span></div>
+          <div class="preview-line"><span class="preview-ln">6</span><span class="preview-cmd">*create</span> <span style="color:var(--dim)">honor</span> <span style="color:#a07ec9">50</span></div>
+          <div class="preview-line"><span class="preview-ln">7</span><span class="preview-cmd">*create</span> <span style="color:var(--dim)">allegiance</span> <span class="preview-str">"none"</span></div>
+          <div class="preview-line"><span class="preview-ln">8</span></div>
+          <div class="preview-line"><span class="preview-ln">9</span><span style="color:var(--dim)">The throne room is silent. You have waited</span></div>
+          <div class="preview-line"><span class="preview-ln">10</span><span style="color:var(--dim)">three years for this moment.</span> <span class="cursor-blink"></span></div>
+        </div>
+        <div class="preview-errors">
+          <div class="preview-errors-label">Live Errors · 1</div>
+          <div class="preview-error-item">
+            <span class="preview-error-line">L6</span>
+            <span class="preview-error-msg">*create outside startup.txt</span>
+          </div>
+          <div style="margin-top:16px;font-size:0.72rem;color:var(--muted);font-style:italic;font-family:var(--font-body)">
+            0 warnings · Checks run every 400ms
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Philosophy -->
+<section class="philosophy">
+  <div class="container">
+    <div class="reveal">
+      <div class="ornament">
+        <div class="ornament-line"></div>
+        <div class="ornament-diamond"></div>
+        <div class="ornament-line"></div>
+      </div>
+      <p class="philosophy-quote">"Your story lives on your machine. Quillon never touches a server. What you write belongs entirely to you."</p>
+      <div class="philosophy-attr">Privacy by Design</div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="cta-section" id="start">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Begin</div>
+      <h2 class="section-title">Choose How You Work</h2>
+      <p>Both versions are free. Both save locally. Neither asks for your email.</p>
+    </div>
+    <div class="cta-buttons-wrap">
+      <div class="cta-pair reveal">
+        <div style="text-align:center">
+          <a href="#download" class="btn-primary" id="download">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
+            Download Software
+          </a>
+          <div class="btn-note">Windows · macOS · Linux<br>Saves to your file system</div>
+        </div>
+        <div class="cta-divider">or</div>
+        <div style="text-align:center">
+          <a href="http://localhost:5173" class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2c-2 2-3 3.5-3 6s1 4 3 6"/><path d="M8 2c2 2 3 3.5 3 6s-1 4-3 6"/><path d="M2 8h12"/></svg>
+            Use in Browser
+          </a>
+          <div class="btn-note">No install · Installable as app<br>Saves to browser storage</div>
+        </div>
+      </div>
+      <p class="privacy-note reveal">No account. No cloud. No tracking. Your projects stay exactly where you put them — on your machine, in your control.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">QUILLON</div>
+  <div class="footer-text">Crafted for ChoiceScript authors who take their work seriously.</div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
+}, { threshold: 0.12 })
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+
+// Typewriter on hero
+const phrases = ['Write Every Path', 'Every Choice Matters', 'Your Story, Complete']
+let phraseIdx = 0, charIdx = 0, typing = true
+const titleEl = document.querySelector('.hero-title em')
+if (titleEl) {
+  setInterval(() => {
+    const phrase = phrases[phraseIdx]
+    if (typing) {
+      titleEl.textContent = phrase.slice(0, ++charIdx)
+      if (charIdx === phrase.length) { typing = false; setTimeout(() => {}, 2000) }
+    } else {
+      titleEl.textContent = phrase.slice(0, --charIdx)
+      if (charIdx === 0) { typing = true; phraseIdx = (phraseIdx + 1) % phrases.length }
+    }
+  }, typing ? 80 : 50)
+}
+</script>
+</body>
+</html>

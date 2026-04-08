@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#c9a96e">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quillon — Interactive Fiction Workbench</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles/main.css">
+<link rel="stylesheet" href="./styles/dashboard.css">
+<link rel="stylesheet" href="./styles/editor.css">
+<link rel="stylesheet" href="./styles/storymap.css">
+<link rel="stylesheet" href="./styles/modals.css">
+<link rel="stylesheet" href="./styles/actions.css">
+<link rel="stylesheet" href="./styles/analysis.css">
+<link rel="stylesheet" href="./styles/feedback.css">
+<link rel="stylesheet" href="./styles/features.css">
+<link rel="stylesheet" href="./styles/writemode_override.css">
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <a class="topbar-logo" href="#" id="nav-logo">
+      <div class="logo-icon">
+        <img src="/icon-192.png" alt="Quillon" style="width:28px;height:28px;object-fit:contain;">
+      </div>
+      <span class="logo-text">Quillon</span>
+    </a>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-dashboard" data-view="dashboard">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h5v7H2zM9 2h5v4H9zM9 8h5v6H9zM2 11h5v3H2z" opacity="0.7"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-tab" id="tab-storymap" data-view="storymap">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="3" cy="8" r="2"/><circle cx="13" cy="4" r="2"/><circle cx="13" cy="12" r="2"/><path d="M5 7.3l6-2.6M5 8.7l6 2.6"/></svg>
+        Story Map
+      </button>
+      <button class="nav-tab" id="tab-editor" data-view="editor">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 5h6M5 8h4M5 11h3"/></svg>
+        Editor
+      </button>
+      <button class="nav-tab" id="tab-analysis" data-view="analysis">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 12l3-4 3 2 3-5 3 2"/></svg>
+        Analysis
+      </button>
+    </div>
+    <div class="topbar-right">
+      <div class="project-pill" id="active-project-pill" style="display:none">
+        <div class="dot"></div>
+        <strong id="active-project-name">—</strong>
+      </div>
+      <div class="autosave-badge" id="autosave-badge">✓ Saved</div>
+      <button class="icon-btn" id="actions-toggle-btn" title="Activity Log">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 4h12M2 8h8M2 12h5"/></svg>
+        <span id="actions-unread" class="actions-unread-dot" style="display:none"></span>
+      </button>
+      <button class="bin-tab-btn" id="tab-bin" data-view="bin" title="Recycle Bin">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h10l-1 9H4L3 4zM2 4h12M6 4V2h4v2M6 7v4M10 7v4"/></svg>
+        <span id="bin-count-badge" style="display:none"></span>
+      </button>
+      <button class="icon-btn" id="theme-toggle-btn" title="Toggle light/dark mode">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 12.5A5.5 5.5 0 018 2.5v11z"/></svg>
+      </button>
+      <button class="icon-btn" id="settings-btn" title="Settings">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 5a3 3 0 100 6A3 3 0 008 5zm0 4.5A1.5 1.5 0 118 6.5a1.5 1.5 0 010 3zM13.5 8a5.5 5.5 0 01-.4 2.06l1.4 1.4-1.06 1.06-1.4-1.4A5.5 5.5 0 018 13.5a5.5 5.5 0 01-2.06-.4l-1.4 1.4-1.06-1.06 1.4-1.4A5.5 5.5 0 012.5 8a5.5 5.5 0 01.4-2.06L1.5 4.54 2.56 3.5l1.4 1.4A5.5 5.5 0 018 2.5a5.5 5.5 0 012.06.4l1.4-1.4 1.06 1.06-1.4 1.4A5.5 5.5 0 0113.5 8z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="content">
+    <div id="view-dashboard" class="view active"></div>
+    <div id="view-storymap" class="view"></div>
+    <div id="view-editor" class="view"></div>
+    <div id="view-analysis" class="view"></div>
+    <div id="view-bin" class="view"></div>
+  </div>
+  <div id="actions-panel">
+    <div class="ap-header">
+      <div class="ap-title">Activity Log</div>
+      <div style="display:flex;gap:6px">
+        <button class="ap-clear-btn" id="ap-clear-btn">Clear</button>
+        <button class="ap-close-btn" id="ap-close-btn">✕</button>
+      </div>
+    </div>
+    <div class="ap-list" id="ap-list">
+      <div class="ap-empty">No activity yet.</div>
+    </div>
+  </div>
+  <div id="actions-backdrop"></div>
+  <div id="write-mode-overlay" class="hidden"></div>
+  <div id="modal-container"></div>
+  <div id="toast-container"></div>
+
+  <!-- Bottom floating buttons -->
+  <div class="bottom-float-btns">
+    <button class="float-btn fbs-btn" onclick="openFeedbackModal()" title="Send feedback, report bugs or make suggestions">
+      💬 Feedback, Bugs &amp; Suggestions
+    </button>
+    <button class="float-btn request-btn" onclick="openRequestModal()" title="Request a custom feature or personalisation">
+      ✦ Request
+    </button>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div class="fbs-overlay" id="fbs-overlay" style="display:none">
+    <div class="fbs-modal">
+      <div class="fbs-modal-header">
+        <div class="fbs-modal-title">💬 Feedback, Bugs &amp; Suggestions</div>
+        <button class="fbs-close" onclick="closeFeedbackModal()">✕</button>
+      </div>
+      <div class="fbs-modal-body">
+        <div class="fbs-field">
+          <label>Type</label>
+          <div class="fbs-type-row">
+            <button class="fbs-type-btn active" data-type="feedback" onclick="selectFbsType(this)">💬 Feedback</button>
+            <button class="fbs-type-btn" data-type="bug" onclick="selectFbsType(this)">🐛 Bug</button>
+            <button class="fbs-type-btn" data-type="suggestion" onclick="selectFbsType(this)">💡 Suggestion</button>
+          </div>
+        </div>
+        <div class="fbs-field">
+          <label>Your message *</label>
+          <textarea id="fbs-message" placeholder="Describe your feedback, bug, or suggestion…" rows="5"></textarea>
+        </div>
+        <div class="fbs-field">
+          <label>Your name (optional)</label>
+          <input type="text" id="fbs-name" placeholder="Anonymous">
+        </div>
+        <div class="fbs-field">
+          <label>Email for reply (optional)</label>
+          <input type="email" id="fbs-email" placeholder="you@example.com">
+        </div>
+        <div class="fbs-note">Your message goes directly to the Quillon team.</div>
+      </div>
+      <div class="fbs-modal-footer">
+        <button class="fbs-cancel" onclick="closeFeedbackModal()">Cancel</button>
+        <button class="fbs-submit" onclick="submitFeedback()">Send →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Modal -->
+  <div class="fbs-overlay" id="request-overlay" style="display:none">
+    <div class="fbs-modal fbs-modal-request">
+      <div class="fbs-modal-header">
+        <div class="fbs-modal-title">✦ Custom Request</div>
+        <button class="fbs-close" onclick="closeRequestModal()">✕</button>
+      </div>
+      <div class="fbs-modal-body">
+        <div class="request-hero">
+          <div class="request-hero-title">Make Quillon Yours</div>
+          <div class="request-hero-sub">Request a custom feature, workflow, or personalisation exclusive to your version.</div>
+        </div>
+        <div class="request-tiers">
+          <div class="request-tier">
+            <div class="request-tier-name">Minor Tweak</div>
+            <div class="request-tier-price">From 0</div>
+            <div class="request-tier-desc">Small UI changes, label edits, colour themes, layout tweaks</div>
+          </div>
+          <div class="request-tier featured">
+            <div class="request-tier-badge">Popular</div>
+            <div class="request-tier-name">Feature Add</div>
+            <div class="request-tier-price">From 0</div>
+            <div class="request-tier-desc">New panels, custom commands, workflow additions, integrations</div>
+          </div>
+          <div class="request-tier">
+            <div class="request-tier-name">Full Custom Build</div>
+            <div class="request-tier-price">From 50</div>
+            <div class="request-tier-desc">Fully personalised Quillon — your branding, your features, your workflow</div>
+          </div>
+        </div>
+        <div class="fbs-field" style="margin-top:18px">
+          <label>Describe your request *</label>
+          <textarea id="req-message" placeholder="What do you want Quillon to do or look like?" rows="4"></textarea>
+        </div>
+        <div class="fbs-field">
+          <label>Your email *</label>
+          <input type="email" id="req-email" placeholder="So we can send a quote and discuss details">
+        </div>
+        <div class="fbs-note">No commitment — we'll review and send a quote first.</div>
+      </div>
+      <div class="fbs-modal-footer">
+        <button class="fbs-cancel" onclick="closeRequestModal()">Cancel</button>
+        <button class="fbs-submit request-submit" onclick="submitRequest()">Send Request →</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="./main.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").catch(() => {})
+}
+</script>
+</body>
+</html>
