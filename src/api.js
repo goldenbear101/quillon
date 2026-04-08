@@ -4,7 +4,7 @@ const isElectron = window.electronAPI?.isElectron === true
 // In production (Cloudflare Pages), API calls go to Railway backend
 // In Electron, they go to the local embedded server
 // In dev, they go to localhost:3001
-const RAILWAY_URL = 'YOUR_RAILWAY_URL'  // replaced after Railway deploy
+const RAILWAY_URL = 'https://quillon-production.up.railway.app'
 
 const BASE = isElectron
   ? 'http://localhost:3941/api'
