@@ -663,11 +663,7 @@ footer {
 <!-- Navigation -->
 <nav>
   <a href="#" class="nav-logo">
-    <svg class="nav-logo-icon" viewBox="0 0 32 32" fill="none">
-      <path d="M6 6 C6 6 12 3 16 16 C20 29 26 26 26 26" stroke="#c9a45a" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M6 26 C6 26 10 20 16 16 C22 12 26 6 26 6" stroke="#c9a45a" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
-      <circle cx="16" cy="16" r="2.5" fill="#c9a45a"/>
-    </svg>
+    <img src="icon-192.png" alt="Quillon" style="width:30px;height:30px;object-fit:contain;border-radius:4px;">
     <span class="nav-logo-text">QUILLON</span>
   </a>
   <div class="nav-links">
@@ -690,7 +686,7 @@ footer {
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
       Download Software
     </a>
-    <a href="http://localhost:5173" class="btn-secondary">
+    <a href="https://quillon.pages.dev" class="btn-secondary">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2c-2 2-3 3.5-3 6s1 4 3 6"/><path d="M8 2c2 2 3 3.5 3 6s-1 4-3 6"/><path d="M2 8h12"/></svg>
       Use in Browser
     </a>
@@ -861,19 +857,26 @@ footer {
     <div class="cta-buttons-wrap">
       <div class="cta-pair reveal">
         <div style="text-align:center">
-          <a href="#download" class="btn-primary" id="download">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
-            Download Software
-          </a>
-          <div class="btn-note">Windows · macOS · Linux<br>Saves to your file system</div>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+            <a href="https://github.com/YOURUSERNAME/quillon/releases/latest/download/Quillon-Setup-1.0.0.exe" class="btn-primary" id="download">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
+              Windows
+            </a>
+            <div style="position:relative;display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--dim);font-family:var(--font-mono);font-size:13px;cursor:default">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="2"/><path d="M6 6h4M6 9h2"/></svg>
+              macOS
+              <span style="position:absolute;top:-9px;right:-9px;background:var(--bg-surface,#1a1c21);border:1px solid var(--border);color:var(--dim);font-size:9px;padding:1px 7px;border-radius:10px;font-family:var(--font-mono);white-space:nowrap;letter-spacing:0.04em">Coming Soon</span>
+            </div>
+          </div>
+          <div class="btn-note">Free · No account required<br>Saves to your file system</div>
         </div>
         <div class="cta-divider">or</div>
         <div style="text-align:center">
-          <a href="http://localhost:5173" class="btn-secondary">
+          <a href="https://quillon.pages.dev" class="btn-secondary">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 2c-2 2-3 3.5-3 6s1 4 3 6"/><path d="M8 2c2 2 3 3.5 3 6s-1 4-3 6"/><path d="M2 8h12"/></svg>
             Use in Browser
           </a>
-          <div class="btn-note">No install · Installable as app<br>Saves to browser storage</div>
+          <div class="btn-note">No install · Works instantly<br>Saves to browser storage</div>
         </div>
       </div>
       <p class="privacy-note reveal">No account. No cloud. No tracking. Your projects stay exactly where you put them — on your machine, in your control.</p>
@@ -885,6 +888,7 @@ footer {
 <footer>
   <div class="footer-logo">QUILLON</div>
   <div class="footer-text">Crafted for ChoiceScript authors who take their work seriously.</div>
+  <div style="margin-top:16px;font-family:var(--font-mono);font-size:11px;color:var(--dim,#5a5750)">© 2025 Quillon. All rights reserved.</div>
 </footer>
 
 <script>

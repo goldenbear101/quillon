@@ -106,7 +106,7 @@ async function boot() {
   try {
     await API.health()
   } catch {
-    showToast('Cannot reach Skein server — make sure npm run dev is running', 'error')
+    showToast('Cannot reach Quillon server — make sure npm run dev is running', 'error')
   }
   showView('dashboard')
   document.dispatchEvent(new Event('skein:ready'))
@@ -135,15 +135,14 @@ window.submitFeedback = async function() {
   const email = document.getElementById('fbs-email').value.trim()
   if (!msg) { showToast('Please write a message first', 'error'); return }
 
-  // Send via Formspree — replace YOUR_FORM_ID with your actual Formspree form ID
-  const FORMSPREE_ID = 'YOUR_FORM_ID'
+  const FORMSPREE_ID = 'mlgokyyl'
   try {
     const resp = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ type: fbsType, message: msg, name, email, _subject: `Quillon ${fbsType}: ${msg.slice(0,50)}` })
     })
-    if (resp.ok || FORMSPREE_ID === 'YOUR_FORM_ID') {
+    if (resp.ok || FORMSPREE_ID === 'mlgokyyl') {
       closeFeedbackModal()
       document.getElementById('fbs-message').value = ''
       document.getElementById('fbs-name').value = ''
@@ -172,7 +171,7 @@ window.submitRequest = async function() {
   if (!msg) { showToast('Please describe your request', 'error'); return }
   if (!email) { showToast('Please enter your email so we can reply', 'error'); return }
 
-  const FORMSPREE_ID = 'YOUR_FORM_ID'
+  const FORMSPREE_ID = 'mlgokyyl'
   try {
     const resp = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
       method: 'POST',
